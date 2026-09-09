@@ -12,6 +12,9 @@ final class SettingsPanel: NSPanel {
     private let grainSize = NSSegmentedControl(labels: ["1 px", "2 px", "3 px"], trackingMode: .selectOne, target: nil, action: nil)
     private let tintWell = NSColorWell()
     private let tintStrength = NSSlider()
+    private let grainStrengthValue = NSTextField(labelWithString: "")
+    private let grainColourValue = NSTextField(labelWithString: "")
+    private let tintStrengthValue = NSTextField(labelWithString: "")
     private let excludeCheckbox = NSButton(checkboxWithTitle: "Hide from screenshots and recordings", target: nil, action: nil)
     private let loginCheckbox = NSButton(checkboxWithTitle: "Launch at login", target: nil, action: nil)
 
@@ -20,7 +23,7 @@ final class SettingsPanel: NSPanel {
 
     init(store: SettingsStore) {
         self.store = store
-        super.init(contentRect: NSRect(x: 0, y: 0, width: 360, height: 320),
+        super.init(contentRect: NSRect(x: 0, y: 0, width: 400, height: 320),
                    styleMask: [.titled, .closable, .utilityWindow],
                    backing: .buffered,
                    defer: false)
@@ -61,10 +64,10 @@ final class SettingsPanel: NSPanel {
         stack.addArrangedSubview(row("Preset", presetPopup))
 
         configure(grainStrength, range: FilterSettings.grainStrengthRange, action: #selector(valueChanged(_:)))
-        stack.addArrangedSubview(row("Grain", grainStrength))
+        stack.addArrangedSubview(row("Grain", grainStrength, value: grainStrengthValue))
 
         configure(grainColour, range: FilterSettings.grainColourRange, action: #selector(valueChanged(_:)))
-        stack.addArrangedSubview(row("Grain colour", grainColour))
+        stack.addArrangedSubview(row("Grain colour", grainColour, value: grainColourValue))
 
         grainSize.target = self
         grainSize.action = #selector(valueChanged(_:))
@@ -77,7 +80,7 @@ final class SettingsPanel: NSPanel {
         stack.addArrangedSubview(row("Tint", tintWell))
 
         configure(tintStrength, range: FilterSettings.tintStrengthRange, action: #selector(valueChanged(_:)))
-        stack.addArrangedSubview(row("Tint strength", tintStrength))
+        stack.addArrangedSubview(row("Tint strength", tintStrength, value: tintStrengthValue))
 
         stack.addArrangedSubview(NSBox.separatorLine())
 
@@ -102,7 +105,7 @@ final class SettingsPanel: NSPanel {
             stack.bottomAnchor.constraint(equalTo: content.bottomAnchor),
             stack.leadingAnchor.constraint(equalTo: content.leadingAnchor),
             stack.trailingAnchor.constraint(equalTo: content.trailingAnchor),
-            stack.widthAnchor.constraint(equalToConstant: 360),
+            stack.widthAnchor.constraint(equalToConstant: 400),
         ])
         contentView = content
         setContentSize(content.fittingSize)
@@ -117,11 +120,19 @@ final class SettingsPanel: NSPanel {
         slider.widthAnchor.constraint(equalToConstant: 200).isActive = true
     }
 
-    private func row(_ title: String, _ control: NSView) -> NSView {
+    private func row(_ title: String, _ control: NSView, value: NSTextField? = nil) -> NSView {
         let label = NSTextField(labelWithString: title)
         label.alignment = .right
         label.widthAnchor.constraint(equalToConstant: 100).isActive = true
-        let row = NSStackView(views: [label, control])
+        var views: [NSView] = [label, control]
+        if let value {
+            value.font = .monospacedDigitSystemFont(ofSize: NSFont.smallSystemFontSize, weight: .regular)
+            value.textColor = .secondaryLabelColor
+            value.alignment = .right
+            value.widthAnchor.constraint(equalToConstant: 36).isActive = true
+            views.append(value)
+        }
+        let row = NSStackView(views: views)
         row.orientation = .horizontal
         row.spacing = 12
         row.alignment = .centerY
@@ -139,6 +150,7 @@ final class SettingsPanel: NSPanel {
         grainColour.doubleValue = f.grainColour
         grainSize.selectedSegment = max(0, min(2, f.grainSize - 1))
         tintStrength.doubleValue = f.tintStrength
+        updateValueLabels(f)
         if let rgb = f.tintRGB {
             tintWell.color = NSColor(srgbRed: rgb.r, green: rgb.g, blue: rgb.b, alpha: 1)
         }
@@ -149,6 +161,12 @@ final class SettingsPanel: NSPanel {
         }
         excludeCheckbox.state = store.excludeFromCapture ? .on : .off
         loginCheckbox.state = LaunchAtLogin.isEnabled ? .on : .off
+    }
+
+    private func updateValueLabels(_ f: FilterSettings) {
+        grainStrengthValue.stringValue = String(format: "%.2f", f.grainStrength)
+        grainColourValue.stringValue = String(format: "%.2f", f.grainColour)
+        tintStrengthValue.stringValue = String(format: "%.2f", f.tintStrength)
     }
 
     @objc private func presetChanged(_ sender: NSPopUpButton) {
@@ -186,7 +204,7 @@ private extension NSBox {
     static func separatorLine() -> NSBox {
         let box = NSBox()
         box.boxType = .separator
-        box.widthAnchor.constraint(equalToConstant: 328).isActive = true
+        box.widthAnchor.constraint(equalToConstant: 368).isActive = true
         return box
     }
 }
