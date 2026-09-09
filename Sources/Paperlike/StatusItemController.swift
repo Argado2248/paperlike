@@ -31,6 +31,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         }
 
         menu.delegate = self
+        menu.autoenablesItems = false
         buildMenu()
         refreshIcon()
 
@@ -134,9 +135,20 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         let quitItem = NSMenuItem(title: "Quit Paperlike", action: #selector(quit(_:)), keyEquivalent: "q")
         quitItem.target = self
         menu.addItem(quitItem)
+
+        // Diagnostics: which window level and collection behaviour this
+        // running instance is actually using. Disabled, informational only.
+        let info = NSMenuItem(title: "", action: nil, keyEquivalent: "")
+        info.isEnabled = false
+        info.tag = Tag.info
+        menu.addItem(info)
     }
 
     func menuNeedsUpdate(_ menu: NSMenu) {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "dev"
+        menu.item(withTag: Tag.info)?.title = String(
+            format: "v%@ · level %d · behavior %lu",
+            version, OverlayWindow.preferredLevel.rawValue, OverlayWindow.preferredCollectionBehavior.rawValue)
         menu.item(withTag: Tag.toggle)?.title = store.isEnabled ? "Turn Paperlike Off" : "Turn Paperlike On"
         menu.item(withTag: Tag.exclude)?.state = store.excludeFromCapture ? .on : .off
 
@@ -161,5 +173,6 @@ final class StatusItemController: NSObject, NSMenuDelegate {
         static let presets = 2
         static let exclude = 3
         static let login = 4
+        static let info = 5
     }
 }
