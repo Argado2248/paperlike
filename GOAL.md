@@ -90,15 +90,17 @@ than a plain `.app`.
 
 ## The look
 
-Match a matte paper protector, not a photo filter. Default parameters:
+Match a matte paper protector, not a photo filter. Default parameters
+(tuned by eye on a MacBook Pro; the first guesses were roughly three
+times stronger and looked like static):
 
 | Parameter        | Default | Range          | Notes                                     |
 |------------------|---------|----------------|-------------------------------------------|
-| Grain strength   | 0.18    | 0.00 to 0.45   | Alpha of the grain layer                  |
+| Grain strength   | 0.05    | 0.00 to 0.30   | Alpha of the grain layer                  |
 | Grain size       | 1 px    | 1 to 3 px      | Block size of one grain, device pixels    |
-| Grain colour     | 0.70    | 0.00 to 1.00   | 0 = monochrome, 1 = fully independent RGB |
+| Grain colour     | 0.00    | 0.00 to 1.00   | 0 = monochrome, 1 = fully independent RGB |
 | Tint colour      | #F4EEDF | any warm off-white | Slight cream, like uncoated paper     |
-| Tint strength    | 0.08    | 0.00 to 0.25   | Alpha of the flat tint layer              |
+| Tint strength    | 0.03    | 0.00 to 0.15   | Alpha of the flat tint layer              |
 | Presets          | Paper, Newsprint, Off-white, Custom | Newsprint = greyer tint, more grain |
 
 The grain is **coloured**, not monochrome. Each grain gets a shared

@@ -52,11 +52,11 @@ System Settings → Privacy & Security.
 
 | Setting        | Default | Range        |
 |----------------|---------|--------------|
-| Grain          | 0.18    | 0 to 0.45    |
-| Grain colour   | 0.70    | 0 (mono) to 1 (full RGB) |
+| Grain          | 0.05    | 0 to 0.30    |
+| Grain colour   | 0.00    | 0 (mono) to 1 (full RGB) |
 | Grain size     | 1 px    | 1 to 3 px    |
 | Tint           | #F4EEDF | any colour   |
-| Tint strength  | 0.08    | 0 to 0.25    |
+| Tint strength  | 0.03    | 0 to 0.15    |
 
 ## Limitations
 

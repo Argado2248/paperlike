@@ -9,17 +9,17 @@ public struct FilterSettings: Codable, Equatable, Sendable {
     public var tintHex: String
     public var tintStrength: Double
 
-    public static let grainStrengthRange: ClosedRange<Double> = 0.0...0.45
+    public static let grainStrengthRange: ClosedRange<Double> = 0.0...0.30
     public static let grainSizeRange: ClosedRange<Int> = 1...3
     public static let grainColourRange: ClosedRange<Double> = 0.0...1.0
-    public static let tintStrengthRange: ClosedRange<Double> = 0.0...0.25
+    public static let tintStrengthRange: ClosedRange<Double> = 0.0...0.15
 
     public init(
-        grainStrength: Double = 0.18,
+        grainStrength: Double = 0.05,
         grainSize: Int = 1,
-        grainColour: Double = 0.7,
+        grainColour: Double = 0.0,
         tintHex: String = "F4EEDF",
-        tintStrength: Double = 0.08
+        tintStrength: Double = 0.03
     ) {
         self.grainStrength = grainStrength
         self.grainSize = grainSize
