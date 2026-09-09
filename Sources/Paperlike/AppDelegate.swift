@@ -18,7 +18,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self?.store.isEnabled.toggle()
         }
 
-        overlay.setVisible(store.isEnabled, animated: false)
+        overlay.sync(animated: false)
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        // Gamma tables revert when the process exits anyway, but be explicit.
+        CGDisplayRestoreColorSyncSettings()
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {

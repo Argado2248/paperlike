@@ -1,11 +1,14 @@
 import AppKit
 import PaperlikeCore
 
-/// Owns one OverlayWindow per connected display and keeps them in sync with
-/// the settings store and with display hot-plug, sleep and wake.
+/// Owns the display tint and one grain OverlayWindow per connected display,
+/// and keeps them in sync with the settings store and with display hot-plug,
+/// sleep and wake.
 final class OverlayController {
     private let store: SettingsStore
+    private let tint = DisplayTint()
     private var windows: [CGDirectDisplayID: OverlayWindow] = [:]
+    /// Whether the grain windows are currently ordered in.
     private(set) var isVisible = false
     private var observers: [(center: NotificationCenter, token: NSObjectProtocol)] = []
 
@@ -20,9 +23,7 @@ final class OverlayController {
         }))
         observers.append((nc, nc.addObserver(forName: SettingsStore.didChange,
                                              object: store, queue: .main) { [weak self] _ in
-            guard let self else { return }
-            self.setVisible(self.store.isEnabled, animated: true)
-            self.applySettings()
+            self?.sync(animated: true)
         }))
         observers.append((wc, wc.addObserver(forName: NSWorkspace.didWakeNotification,
                                              object: nil, queue: .main) { [weak self] _ in
@@ -43,9 +44,21 @@ final class OverlayController {
         observers.forEach { $0.center.removeObserver($0.token) }
     }
 
+    // MARK: Sync
+
+    /// Bring tint and grain windows in line with the store.
+    func sync(animated: Bool) {
+        let enabled = store.isEnabled
+        tint.set(enabled ? store.filter : nil)
+        // A grain window with zero grain is pure cost and still takes part in
+        // the Space-switch animation, so keep it hidden in that case.
+        setVisible(enabled && store.filter.grainStrength > 0, animated: animated)
+        applySettings()
+    }
+
     // MARK: Visibility
 
-    func setVisible(_ visible: Bool, animated: Bool) {
+    private func setVisible(_ visible: Bool, animated: Bool) {
         guard visible != isVisible else { return }
         isVisible = visible
         for window in windows.values {

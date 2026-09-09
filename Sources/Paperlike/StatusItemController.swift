@@ -119,7 +119,7 @@ final class StatusItemController: NSObject, NSMenuDelegate {
 
         menu.addItem(.separator())
 
-        let excludeItem = NSMenuItem(title: "Hide from Screenshots and Recordings",
+        let excludeItem = NSMenuItem(title: "Hide Grain from Screenshots and Recordings",
                                      action: #selector(toggleExcludeFromCapture(_:)), keyEquivalent: "")
         excludeItem.target = self
         excludeItem.tag = Tag.exclude

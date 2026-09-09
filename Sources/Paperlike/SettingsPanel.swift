@@ -15,7 +15,7 @@ final class SettingsPanel: NSPanel {
     private let grainStrengthValue = NSTextField(labelWithString: "")
     private let grainColourValue = NSTextField(labelWithString: "")
     private let tintStrengthValue = NSTextField(labelWithString: "")
-    private let excludeCheckbox = NSButton(checkboxWithTitle: "Hide from screenshots and recordings", target: nil, action: nil)
+    private let excludeCheckbox = NSButton(checkboxWithTitle: "Hide grain from screenshots and recordings", target: nil, action: nil)
     private let loginCheckbox = NSButton(checkboxWithTitle: "Launch at login", target: nil, action: nil)
 
     private var observer: NSObjectProtocol?

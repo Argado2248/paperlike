@@ -1,13 +1,13 @@
 import AppKit
 import PaperlikeCore
 
-/// One transparent, click-through window that covers one display.
-/// Two static layers: a flat tint and a tiled grain pattern. Nothing here
-/// redraws unless settings or display geometry change.
+/// One transparent, click-through window that covers one display and shows
+/// the grain texture. (The tint is applied through the display gamma table,
+/// see DisplayTint.) Nothing here redraws unless settings or display
+/// geometry change.
 final class OverlayWindow: NSWindow {
     let displayID: CGDirectDisplayID
 
-    private let tintLayer = CALayer()
     private let grainLayer = CALayer()
 
     /// What the layers currently show. `apply` is called on every screen
@@ -44,14 +44,12 @@ final class OverlayWindow: NSWindow {
         content.autoresizesSubviews = true
         contentView = content
 
-        for layer in [tintLayer, grainLayer] {
-            layer.frame = content.bounds
-            layer.autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
-            layer.isOpaque = false
-            layer.contentsScale = screen.backingScaleFactor
-            layer.actions = ["opacity": NSNull(), "backgroundColor": NSNull(), "bounds": NSNull(), "position": NSNull()]
-            content.layer?.addSublayer(layer)
-        }
+        grainLayer.frame = content.bounds
+        grainLayer.autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
+        grainLayer.isOpaque = false
+        grainLayer.contentsScale = screen.backingScaleFactor
+        grainLayer.actions = ["opacity": NSNull(), "backgroundColor": NSNull(), "bounds": NSNull(), "position": NSNull()]
+        content.layer?.addSublayer(grainLayer)
 
         setFrame(screen.frame, display: false)
     }
@@ -115,13 +113,6 @@ final class OverlayWindow: NSWindow {
         // Only touch the layer properties that actually changed. Assigning a
         // new backgroundColor (even an identical pattern) forces a redraw of
         // the whole layer, and a redraw of a full-screen pattern is visible.
-        if previous?.settings.tintHex != settings.tintHex, let rgb = settings.tintRGB {
-            tintLayer.backgroundColor = CGColor(srgbRed: rgb.r, green: rgb.g, blue: rgb.b, alpha: 1)
-        }
-        if previous?.settings.tintStrength != settings.tintStrength {
-            tintLayer.opacity = Float(settings.tintStrength)
-        }
-
         if previous?.settings.tileSpec != settings.tileSpec || previous?.scale != scale {
             let image = GrainImageFactory.image(for: settings.tileSpec, scale: scale)
             grainLayer.backgroundColor = NSColor(patternImage: image).cgColor
@@ -131,7 +122,6 @@ final class OverlayWindow: NSWindow {
         }
         if previous?.scale != scale {
             grainLayer.contentsScale = scale
-            tintLayer.contentsScale = scale
         }
 
         CATransaction.commit()

@@ -44,7 +44,22 @@ blacks, warmer whites, softer contrast. That is what this app delivers.
 
 ## The chosen approach (do this, not something else)
 
-**One borderless overlay window per display, drawn once.**
+**Tint through the display gamma table; grain through one borderless
+overlay window per display, drawn once.**
+
+- The tint is applied with `CGSetDisplayTransferByTable` on every active
+  display: the display's ColorSync base table sampled at
+  `(1 - a) * x + a * tint`, which reproduces a source-over overlay exactly.
+  It is applied at the display output, so it covers the menu bar, Dock,
+  full-screen apps and the Space-switch animation itself, never blinks,
+  costs nothing per frame and never appears in screenshots. Re-read the
+  base tables and reapply on display reconfiguration and on screen wake;
+  restore with `CGDisplayRestoreColorSyncSettings` when off and on quit.
+- Any overlay window, at any level or collection behaviour, drops out of
+  the Space-switch animation for a frame or two. That is why the tint is
+  not an overlay. The grain still is, because a texture cannot go through
+  a gamma table; at the default strength the window is nearly transparent
+  so the blink is invisible, and at grain 0 the window is not shown at all.
 
 - Swift + AppKit. `LSUIElement = true` so there is no Dock icon. An
   `NSStatusItem` in the menu bar is the whole UI, with a small popover or
@@ -64,10 +79,10 @@ blacks, warmer whites, softer contrast. That is what this app delivers.
   screen recordings, and screen sharing**. The filter is for the person
   looking at the glass, not for what they capture or present. Expose this as
   a setting, default on.
-- The window's content view is layer-backed with exactly two static layers:
-  a flat tint layer, and a grain layer whose `backgroundColor` is an
+- The window's content view is layer-backed with exactly one static layer:
+  a grain layer whose `backgroundColor` is an
   `NSColor(patternImage:)` built from a **pre-generated grain tile** (about
-  256x256 device pixels, generated once from a seeded PRNG, rendered at the
+  240x240 device pixels, generated once from a seeded PRNG, rendered at the
   display's `backingScaleFactor` so grain is crisp on Retina). Nothing in the
   view is redrawn after that unless the user changes a setting or the
   display configuration changes.
@@ -124,8 +139,13 @@ wide.
 
 ## Known platform limits (state these in the README, do not fight them)
 
-- The overlay is not shown on the login window, the lock screen, or over
-  secure system dialogs.
+- The grain overlay is not shown on the login window, the lock screen, or
+  over secure system dialogs. The tint is, since it lives in the display
+  pipeline.
+- Apps that also write gamma tables (f.lux and similar) fight over the same
+  table. Night Shift and True Tone use a different mechanism and stack fine.
+- The grain window blinks for a frame during Space-switch animations. At
+  the default strength this is not visible; at grain 0 there is no window.
 - Some system UI drawn by the window server at special levels (the cursor,
   some notification banners while animating) may appear above the overlay.
 - With `sharingType = .none` the effect is not in screenshots. That is
