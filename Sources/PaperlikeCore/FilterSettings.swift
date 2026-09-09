@@ -88,9 +88,9 @@ public enum Preset: String, CaseIterable, Sendable {
         case .paper:
             return .default
         case .newsprint:
-            return FilterSettings(grainStrength: 0.26, grainSize: 1, grainColour: 0.5, tintHex: "E6E2D8", tintStrength: 0.12)
+            return FilterSettings(grainStrength: 0.08, grainSize: 1, grainColour: 0.3, tintHex: "E6E2D8", tintStrength: 0.05)
         case .offWhite:
-            return FilterSettings(grainStrength: 0.12, grainSize: 1, grainColour: 0.7, tintHex: "F7F5F0", tintStrength: 0.06)
+            return FilterSettings(grainStrength: 0.03, grainSize: 1, grainColour: 0.0, tintHex: "F7F5F0", tintStrength: 0.02)
         }
     }
 
