@@ -10,15 +10,17 @@ full colour accuracy back.
 
 ## How it works
 
-Paperlike opens one borderless, transparent, click-through window per
-display, above the menu bar and Dock, and paints two static layers into it:
-a flat tint and a tiled grain texture generated once from a seeded random
-number generator. The window server composites it like any other window.
-There is no timer, no render loop, no screen capture, and no shader. Idle
-cost is zero CPU. Input goes straight through to whatever is underneath.
+The tint goes through each display's gamma table, the same channel Night
+Shift uses. It is applied at the display output, so it covers everything
+including the menu bar, Dock, full-screen apps and the desktop-switch
+animation, never flickers, and never shows up in screenshots.
 
-By default the overlay is excluded from screenshots, screen recordings and
-screen sharing, so what you capture or present is untouched.
+The grain is one borderless, transparent, click-through window per display
+painted once with a tiled texture generated from a seeded random number
+generator. There is no timer, no render loop, no screen capture, and no
+shader. Idle cost is zero CPU. Input goes straight through to whatever is
+underneath. By default the grain window is excluded from screenshots and
+recordings too.
 
 ## Install
 
@@ -60,16 +62,20 @@ System Settings → Privacy & Security.
 
 ## Limitations
 
-- Not shown on the login window, lock screen or secure system dialogs.
-- The mouse cursor, pop-up menus and the Cmd-Tab switcher draw above it.
-- The overlay sits just above the menu bar. If it ever blinks or hides on
-  your macOS version, try another window level without rebuilding:
-  `defaults write com.argado.paperlike windowLevel -int 1000` (then quit and
-  relaunch; `-int -1` uses the shielding level, `defaults delete
-  com.argado.paperlike windowLevel` restores the default).
-- With "Hide from screenshots" on, the effect is missing from captures by
-  design.
-- Night Shift and True Tone are independent and stack with Paperlike.
+- The grain window is not shown on the login window, lock screen or secure
+  system dialogs, and blinks for a frame when you swipe between desktops.
+  At the default strength that is not visible; set grain to 0 and there is
+  no window at all. The tint is unaffected.
+- The mouse cursor, pop-up menus and the Cmd-Tab switcher draw above the
+  grain window.
+- Screenshots never include the tint, and by default not the grain either.
+- Night Shift and True Tone stack with Paperlike. Apps that also write
+  display gamma tables (f.lux and similar) will fight with it.
+- Diagnostics: the last line of the right-click menu shows the running
+  version, grain window level and collection behaviour. Both can be
+  overridden for experiments with `defaults write com.argado.paperlike
+  windowLevel -int N` and `collectionBehavior -int N`; `defaults delete`
+  restores the defaults.
 
 ## Development
 
