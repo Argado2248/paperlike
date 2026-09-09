@@ -35,9 +35,7 @@ final class OverlayWindow: NSWindow {
         animationBehavior = .none
         isExcludedFromWindowsMenu = true
         hidesOnDeactivate = false
-        // Above the menu bar (24) and Dock (20), below the shield used for
-        // secure dialogs and the login window.
-        level = .screenSaver
+        level = Self.preferredLevel
         collectionBehavior = [.canJoinAllSpaces, .stationary, .fullScreenAuxiliary, .ignoresCycle]
 
         let content = NSView(frame: NSRect(origin: .zero, size: screen.frame.size))
@@ -56,6 +54,25 @@ final class OverlayWindow: NSWindow {
         }
 
         setFrame(screen.frame, display: false)
+    }
+
+    /// Window level for the overlay.
+    ///
+    /// `.statusBar` (25) sits just above the menu bar (24) and the Dock (20)
+    /// and, like the menu bar, stays visible and stationary while the window
+    /// server animates a Space switch. Higher levels such as `.screenSaver`
+    /// are dropped from that animation and blink for its duration.
+    ///
+    /// Override for experiments without rebuilding:
+    ///   defaults write com.argado.paperlike windowLevel -int 1000
+    ///   defaults write com.argado.paperlike windowLevel -int -1   (CGShieldingWindowLevel)
+    ///   defaults delete com.argado.paperlike windowLevel
+    static var preferredLevel: NSWindow.Level {
+        if let raw = UserDefaults.standard.object(forKey: "windowLevel") as? Int {
+            if raw == -1 { return NSWindow.Level(rawValue: Int(CGShieldingWindowLevel())) }
+            return NSWindow.Level(rawValue: raw)
+        }
+        return .statusBar
     }
 
     override var canBecomeKey: Bool { false }

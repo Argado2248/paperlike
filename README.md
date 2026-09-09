@@ -61,7 +61,12 @@ System Settings → Privacy & Security.
 ## Limitations
 
 - Not shown on the login window, lock screen or secure system dialogs.
-- The mouse cursor and a few window-server animations draw above it.
+- The mouse cursor, pop-up menus and the Cmd-Tab switcher draw above it.
+- The overlay sits just above the menu bar. If it ever blinks or hides on
+  your macOS version, try another window level without rebuilding:
+  `defaults write com.argado.paperlike windowLevel -int 1000` (then quit and
+  relaunch; `-int -1` uses the shielding level, `defaults delete
+  com.argado.paperlike windowLevel` restores the default).
 - With "Hide from screenshots" on, the effect is missing from captures by
   design.
 - Night Shift and True Tone are independent and stack with Paperlike.

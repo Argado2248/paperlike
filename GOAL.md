@@ -52,10 +52,11 @@ blacks, warmer whites, softer contrast. That is what this app delivers.
 - For every `NSScreen`, create one `NSWindow` with `styleMask = .borderless`,
   `isOpaque = false`, `backgroundColor = .clear`, `hasShadow = false`,
   `ignoresMouseEvents = true`, `frame = screen.frame`.
-- Window level above everything the user looks at, including the menu bar
-  and Dock: `level = .screenSaver` (or one step below
-  `CGShieldingWindowLevel()` if `.screenSaver` proves unreliable on the
-  target macOS version).
+- Window level `.statusBar` (25): above the menu bar (24) and Dock (20),
+  and, like the menu bar, kept visible and stationary during Space-switch
+  animations. Higher levels (`.screenSaver`, shielding) are dropped from
+  that animation and blink for its duration. Pop-up menus (101) and the
+  app switcher draw above the overlay; accept that.
 - `collectionBehavior = [.canJoinAllSpaces, .stationary, .fullScreenAuxiliary,
   .ignoresCycle]` so the overlay follows the user across Spaces and sits on
   top of full-screen apps.
