@@ -35,7 +35,8 @@ final class OverlayController {
         }))
 
         rebuildWindows()
-        NSLog("Paperlike: overlay window level %d", OverlayWindow.preferredLevel.rawValue)
+        NSLog("Paperlike: overlay window level %d, collection behavior %lu",
+              OverlayWindow.preferredLevel.rawValue, OverlayWindow.preferredCollectionBehavior.rawValue)
     }
 
     deinit {

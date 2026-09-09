@@ -36,7 +36,7 @@ final class OverlayWindow: NSWindow {
         isExcludedFromWindowsMenu = true
         hidesOnDeactivate = false
         level = Self.preferredLevel
-        collectionBehavior = [.canJoinAllSpaces, .stationary, .fullScreenAuxiliary, .ignoresCycle]
+        collectionBehavior = Self.preferredCollectionBehavior
 
         let content = NSView(frame: NSRect(origin: .zero, size: screen.frame.size))
         content.wantsLayer = true
@@ -73,6 +73,20 @@ final class OverlayWindow: NSWindow {
             return NSWindow.Level(rawValue: raw)
         }
         return .statusBar
+    }
+
+    /// Collection behaviour for the overlay. Default: on every Space,
+    /// stationary during Exposé, allowed over full-screen apps, skipped by
+    /// Cmd-backtick cycling. Raw values for experiments:
+    ///   1 canJoinAllSpaces, 16 stationary, 64 ignoresCycle, 256 fullScreenAuxiliary
+    ///   defaults write com.argado.paperlike collectionBehavior -int 321   (no stationary)
+    ///   defaults write com.argado.paperlike collectionBehavior -int 65    (no stationary, no fullScreenAuxiliary)
+    ///   defaults delete com.argado.paperlike collectionBehavior
+    static var preferredCollectionBehavior: NSWindow.CollectionBehavior {
+        if let raw = UserDefaults.standard.object(forKey: "collectionBehavior") as? Int, raw >= 0 {
+            return NSWindow.CollectionBehavior(rawValue: UInt(raw))
+        }
+        return [.canJoinAllSpaces, .stationary, .fullScreenAuxiliary, .ignoresCycle]
     }
 
     override var canBecomeKey: Bool { false }
