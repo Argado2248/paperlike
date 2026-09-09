@@ -84,6 +84,12 @@ Support/Info.plist
 GOAL.md                  Project goal prompt
 ```
 
-Measured size and idle numbers: to be filled in after the first release
-build on a Mac (`make app` prints the bundle size; check Activity Monitor
-with the filter on).
+Measured on a MacBook Pro running the release bundle from `make install`:
+
+| Metric                  | Value    |
+|-------------------------|----------|
+| Private memory          | 19 MB    |
+| Real memory (incl. shared AppKit pages) | 76 MB |
+| CPU while idle          | ~0%      |
+
+Bundle size is printed by `make app`.
