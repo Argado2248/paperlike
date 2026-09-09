@@ -95,19 +95,25 @@ Match a matte paper protector, not a photo filter. Default parameters:
 | Parameter        | Default | Range          | Notes                                     |
 |------------------|---------|----------------|-------------------------------------------|
 | Grain strength   | 0.18    | 0.00 to 0.45   | Alpha of the grain layer                  |
-| Grain size       | 1 px    | 1 to 3 px      | Scale factor on the tile, device pixels   |
+| Grain size       | 1 px    | 1 to 3 px      | Block size of one grain, device pixels    |
+| Grain colour     | 0.70    | 0.00 to 1.00   | 0 = monochrome, 1 = fully independent RGB |
 | Tint colour      | #F4EEDF | any warm off-white | Slight cream, like uncoated paper     |
 | Tint strength    | 0.08    | 0.00 to 0.25   | Alpha of the flat tint layer              |
 | Presets          | Paper, Newsprint, Off-white, Custom | Newsprint = greyer tint, more grain |
 
-The grain should be monochrome, fine, evenly distributed, with no visible
-tiling seams, no banding, and no colour speckle. A Gaussian-ish distribution
-around mid-grey composited with a `CALayer.compositingFilter` of
-`overlayBlendMode` (or `softLightBlendMode`) reads more like paper than
-plain additive noise. Try both on a white document and on a dark terminal,
-pick the one that looks best, then hard-code that choice. If compositing
-filters cost measurable idle GPU on the target machine, fall back to plain
-source-over alpha with a mid-grey-centred tile.
+The grain is **coloured**, not monochrome. Each grain gets a shared
+luminance offset plus an independent per-channel (R, G, B) offset; the
+"grain colour" parameter mixes between the two. At the default the result
+reads as fine, slightly iridescent paper fibre rather than grey static.
+Distribution is Gaussian around mid-grey, fine, evenly spread, with no
+visible tiling seams and no banding.
+
+Compositing is plain source-over alpha. The window server does not let one
+window blend (overlay, soft light) against the windows beneath it, and
+`CALayer.compositingFilter` only blends against sibling layers in the same
+window, so do not reach for blend modes. A mid-grey-centred tile at low
+alpha already does what a matte film does optically: lifts blacks a little,
+dims whites a little, adds texture.
 
 Hard rule: text on a white background must remain fully legible at every
 setting in range. If a setting makes body text hard to read, the range is too
