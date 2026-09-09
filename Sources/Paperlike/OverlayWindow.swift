@@ -10,6 +10,16 @@ final class OverlayWindow: NSWindow {
     private let tintLayer = CALayer()
     private let grainLayer = CALayer()
 
+    /// What the layers currently show. `apply` is called on every screen
+    /// parameter change (menu bar or Dock hiding, full-screen transitions),
+    /// so it must be a no-op when nothing changed or the overlay blinks.
+    private struct Applied: Equatable {
+        let settings: FilterSettings
+        let excludeFromCapture: Bool
+        let scale: CGFloat
+    }
+    private var applied: Applied?
+
     init(screen: NSScreen, displayID: CGDirectDisplayID) {
         self.displayID = displayID
         super.init(contentRect: screen.frame,
@@ -58,26 +68,48 @@ final class OverlayWindow: NSWindow {
     }
 
     func apply(_ settings: FilterSettings, excludeFromCapture: Bool, scale: CGFloat) {
-        sharingType = excludeFromCapture ? .none : .readOnly
+        let next = Applied(settings: settings, excludeFromCapture: excludeFromCapture, scale: scale)
+        guard next != applied else { return }
+        let previous = applied
+        applied = next
+
+        let wantedSharing: NSWindow.SharingType = excludeFromCapture ? .none : .readOnly
+        if sharingType != wantedSharing {
+            sharingType = wantedSharing
+        }
 
         CATransaction.begin()
         CATransaction.setDisableActions(true)
 
-        if let rgb = settings.tintRGB {
+        // Only touch the layer properties that actually changed. Assigning a
+        // new backgroundColor (even an identical pattern) forces a redraw of
+        // the whole layer, and a redraw of a full-screen pattern is visible.
+        if previous?.settings.tintHex != settings.tintHex, let rgb = settings.tintRGB {
             tintLayer.backgroundColor = CGColor(srgbRed: rgb.r, green: rgb.g, blue: rgb.b, alpha: 1)
         }
-        tintLayer.opacity = Float(settings.tintStrength)
+        if previous?.settings.tintStrength != settings.tintStrength {
+            tintLayer.opacity = Float(settings.tintStrength)
+        }
 
-        let image = GrainImageFactory.image(for: settings.tileSpec, scale: scale)
-        grainLayer.backgroundColor = NSColor(patternImage: image).cgColor
-        grainLayer.opacity = Float(settings.grainStrength)
-        grainLayer.contentsScale = scale
-        tintLayer.contentsScale = scale
+        if previous?.settings.tileSpec != settings.tileSpec || previous?.scale != scale {
+            let image = GrainImageFactory.image(for: settings.tileSpec, scale: scale)
+            grainLayer.backgroundColor = NSColor(patternImage: image).cgColor
+        }
+        if previous?.settings.grainStrength != settings.grainStrength {
+            grainLayer.opacity = Float(settings.grainStrength)
+        }
+        if previous?.scale != scale {
+            grainLayer.contentsScale = scale
+            tintLayer.contentsScale = scale
+        }
 
         CATransaction.commit()
     }
 
+    /// No-op when the display geometry is unchanged, which is the common
+    /// case for the notification that triggers it.
     func move(to screen: NSScreen) {
+        guard frame != screen.frame else { return }
         setFrame(screen.frame, display: false)
     }
 }
